@@ -1,0 +1,25 @@
+﻿@{
+    var userClaims = User.Claims;
+    string highestClaim = "";
+
+    if (userClaims.FirstOrDefault(c => c.Type is MyClaims.SuperAdmin)?.Type == MyClaims.SuperAdmin)
+    {
+        highestClaim = "Role - " + MyClaims.SuperAdmin;
+    }
+    else if (userClaims.FirstOrDefault(c => c.Type == MyClaims.Admin)?.Type == MyClaims.Admin)
+    {
+        highestClaim = "Role - " + MyClaims.Admin;
+    }
+    else if (userClaims.FirstOrDefault(c => c.Type == MyClaims.PostsWriter)?.Type == MyClaims.PostsWriter)
+    {
+        highestClaim = "Role - " + MyClaims.PostsWriter;
+    }
+    else
+    {
+        highestClaim = "Has no Claims";
+    }
+}
+
+<li class="nav-item bg-light rounded rounded-1 fs-5 me-md-3">
+    <div class="nav-link text-bg-info rounded rounded-1 fw-semibold">@highestClaim</div>
+</li>

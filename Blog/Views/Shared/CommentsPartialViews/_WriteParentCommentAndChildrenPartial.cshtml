@@ -1,0 +1,55 @@
+﻿
+@model CommentVM
+
+@if (Model.IsReply == false)
+{
+    @:<div class="removedTransition rounded rounded-3 border-bottom border-5 border-secondary mb-5" 
+    @:     style="margin-left:2%; background-color:lightgray;">
+}
+
+@{
+    await WriteComments(Model.Comment!); // recursion
+
+    async Task WriteComments(CommentDto comment)
+    {
+        if (comment.ParentCommentId is null)
+        {
+                <partial name='_CommentPartial'
+                         model='Model'/>
+        }
+
+        Model.CurrentNested++;
+
+            if (comment!.ChildComments!.Count != 0)
+            {     
+                foreach (CommentDto childComment in comment.ChildComments.OrderBy(c => c.Created))
+                {
+                    @: <div name="d2" class="removedTransition rounded rounded-3" 
+                    @:      style="margin-left:2%; background-color:@Model.BackgroundColor;">
+                        <partial name="_CommentPartial"
+                                 model="new CommentVM
+                                        {
+                                            Comment = childComment,
+                                            CurrentNested = Model.CurrentNested
+                                        }" />
+
+                        await WriteComments(childComment!); // recursion
+                    @: </div>
+                }             
+            }
+            else if(Model.IsReply == true)
+            {
+                @: <div class="removedTransition rounded rounded-3" 
+                @:      style="margin-left:2%;background-color:@Model.BackgroundColor;">
+                       <partial name="_CommentPartial" model="Model" />
+                @: </div>
+            }
+
+        Model.CurrentNested--;
+    }
+}
+
+@if (Model.IsReply == false)
+{
+    @:</div>
+}

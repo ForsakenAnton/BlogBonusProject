@@ -1,0 +1,41 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="text-center mb-5">
+    <h1 class="display-1">
+        <a asp-action="Index"
+           asp-controller="Posts"
+           class="text-decoration-none">Blog</a>
+    </h1>
+
+    <p class="display-5">
+        Use this page to add more info about blog, 
+        for example you can add categories here and other...
+    </p>
+
+</div>
+
+<hr class="bg-secondary" style="height:5px" />
+<p class="fs-3">Test users claims</p>
+<div class="mb-1">
+    <a asp-action="PostsWtiter"
+       asp-controller="TestUsersClaims"
+       class="btn btn-outline-secondary me-3">
+        Posts Writer And Above Access
+    </a>
+</div>
+<div class="mb-1">
+    <a asp-action="Admin"
+       asp-controller="TestUsersClaims"
+       class="btn btn-outline-secondary me-3">
+        Admin And Above Access
+    </a>
+</div>
+<div class="mb-1">
+    <a asp-action="SuperAdmin"
+       asp-controller="TestUsersClaims"
+       class="btn btn-outline-secondary me-3">
+        Super Admin Access Only
+    </a>
+</div>

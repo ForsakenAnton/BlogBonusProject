@@ -1,0 +1,13 @@
+﻿@if (User.HasClaim(MyClaims.SuperAdmin, MyClaims.SuperAdmin))
+{
+    <partial name="_SuperAdminButtonPatrial" />
+}
+@if (User.Identity!.IsAuthenticated)
+{
+    <partial name="_HighestClaimPartial" />
+    <partial name="_LogoutPartial" />
+}
+else
+{
+    <partial name="_LoginRegistrationPartial" />
+}

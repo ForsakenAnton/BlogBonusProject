@@ -1,0 +1,206 @@
+﻿@using Microsoft.AspNetCore.Html
+@model PostsIndexVM
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1 class="display-2">Posts</h1>
+<hr class="bg-success mb-5" style="height:5px;" />
+
+@if (User.HasClaim(MyClaims.PostsWriter, MyClaims.PostsWriter))
+{
+    <a href="#"
+   class="btn btn-lg btn-outline-primary
+              border border-5 border-primary
+              fw-semibold fs-3 mb-5">
+        Write A New Post
+    </a>
+
+    <hr class="bg-success mb-5 mt-0" style="height:5px;" />
+}
+
+@*<div class="text-center">
+    <div class="dropdown-center mb-5">
+        <partial name="_CategoriesDropDownListPartial"
+                 model="new CategoriesDropDownListVM()
+                        {
+                            Categories = Model.Categories,
+                            CategoryId = Model.CategoryId
+                        }" />
+    </div>
+</div>*@
+
+
+<div class="row mb-5">
+
+    @* Filter *@
+    <div class="col-lg-8 border-start border-end border-bottom 
+                border-5 border-secondary rounded-bottom mb-3">
+        <form asp-action="Index" method="get" class="row align-items-lg-end mb-3">
+
+            <div class="col-lg-4">
+                <label asp-for="@Model.FilterVM!.Search"
+                       class="form-label fs-4 fw-semibold"></label>
+                <input name="search"
+                       value="@Model.FilterVM?.Search"
+                       type="search"
+                       class="form-control form-control-lg"
+                       placeholder="search" />
+            </div>
+
+            <div class="col-lg-4 border-start border-end border-secondary">
+                <label asp-for="@Model.FilterVM!.CategoriesSL"
+                       class="form-label fs-4 fw-semibold"></label>
+                <select name="categoryId"
+                        asp-items="@Model.FilterVM!.CategoriesSL"
+                        class="form-select form-select-lg bg-light text-dark"></select>
+            </div>
+
+            <input type="hidden"
+                   name="sortOrder"
+                   value="@Model.SortVM!.Current" />
+
+            <div class="col-lg-4 text-center">
+                <input type="submit"
+                       value="Filter"
+                       class="btn btn-lg btn-outline-success 
+                              border border-3 border-success 
+                              fw-bold w-100" />
+            </div>
+        </form>
+    </div>
+
+
+    @* Sort (alternative version without tag-helper) *@
+    <div class="offset-lg-2 col-lg-2 border-start border-end border-5 border-secondary mb-3">
+        <div class="text-center">
+            <div class="fs-4 fw-semibold mb-2">Sort</div>
+            <div class="dropdown">
+
+                @{
+                    IHtmlContent MakeElementForSortState(SortState sortState)
+                    {
+                        return sortState switch
+                        {
+                            SortState.TitleAsc => Html.Raw("<i class='bi bi-arrow-up'></i> Title"),
+                            SortState.TitleDesc => Html.Raw("<i class='bi bi-arrow-down'></i> Title"),
+                            SortState.DescriptionAsc => Html.Raw("<i class='bi bi-arrow-up'></i> Description"),
+                            SortState.DescriptionDesc => Html.Raw("<i class='bi bi-arrow-down'></i> Description"),
+                            SortState.CategoryAsc => Html.Raw("<i class='bi bi-arrow-up'></i> Category"),
+                            SortState.CategoryDesc => Html.Raw("<i class='bi bi-arrow-down'></i> Category"),
+                            SortState.CreatedAsc => Html.Raw("<i class='bi bi-arrow-up'></i> Created"),
+                            SortState.CreatedDesc => Html.Raw("<i class='bi bi-arrow-down'></i> Created"),
+                            _ => Html.Raw("<i class='bi bi-arrow-up'></i> Title")
+                        };
+                    }
+                }
+
+
+                <a class="btn btn-lg btn-outline-secondary dropdown-toggle w-100"
+                   href="#"
+                   role="button"
+                   id="dropdownMenuLink"
+                   data-bs-toggle="dropdown"
+                   aria-expanded="false">
+                    @MakeElementForSortState(Model.SortVM!.Current)
+                </a>
+
+
+                <ul class="dropdown-menu w-100" aria-labelledby="dropdownMenuLink">
+                    @foreach (SortState state in (SortState[])Enum.GetValues(typeof(SortState)))
+                    {
+                        IHtmlContent sortStateElement = MakeElementForSortState(state);
+
+                        <li>
+                            <a class="dropdown-item" style="cursor:pointer"
+                               asp-action="Index"
+                               asp-route-page="@Model.PageVM!.PageNumber"
+                               asp-route-categoryId="@Model.FilterVM.CategoryId"
+                               asp-route-search="@Model.FilterVM.Search"
+                               asp-route-sortOrder="@state">
+                                @sortStateElement
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    @foreach (PostDto post in Model.Posts)
+    {
+        <partial name="_PostViewPartial" , model="post" />
+    }
+</div>
+
+@* Pagination *@
+<page-link page-vm="Model.PageVM!"
+           page-action="Index"
+           page-url-categoryId="@(Model.FilterVM.CategoryId)"
+           page-url-search="@(Model.FilterVM.Search!)"
+           page-url-sortOrder="@(Model.SortVM.Current)">
+</page-link>
+
+<vc:last-viewed-posts />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+@*@model PostsIndexVM
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1 class="display-2">Posts</h1>
+<hr class="bg-success mb-5" style="height:5px;" />
+
+@if (User.HasClaim(MyClaims.PostsWriter, MyClaims.PostsWriter))
+{
+    <a href="#"
+       class="btn btn-lg btn-outline-primary 
+              border border-5 border-primary 
+              fw-semibold fs-3 mb-5">
+       Write A New Post
+   </a>
+
+    <hr class="bg-success mb-5 mt-0" style="height:5px;" />
+}
+
+<div class="text-center">
+    <div class="dropdown-center mb-5">
+        <partial name="_CategoriesDropDownListPartial"
+                 model="new CategoriesDropDownListVM()
+                        {
+                            Categories = Model.Categories,
+                            CategoryId = Model.CategoryId
+                        }" />
+    </div>
+</div>
+
+
+<div class="row g-3">
+    @foreach (PostDto post in Model.Posts)
+    {
+        <partial name="_PostViewPartial" , model="post" />
+    }
+</div>
+
+<vc:last-viewed-posts />*@

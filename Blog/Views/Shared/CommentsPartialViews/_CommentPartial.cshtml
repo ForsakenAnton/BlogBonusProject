@@ -1,0 +1,159 @@
+﻿@model CommentVM
+
+@{
+    bool isCurentUserComment = 
+        Model.Comment!.User!.UserName == User.Identity!.Name;
+
+    string styleForUsersComment = isCurentUserComment ?
+        @"badge text-bg-light bg-gradient 
+            border border-0 border-bottom border-5 border-success pe-3" :
+        "";
+
+    // для краткости запишем текст комментария и его Id
+    // в переменные, така как особенно последний мы будем
+    // использовать очень часто.
+    // Обратите внимание, как ниже в коде я задаю id элементам.
+    // Это может выглядеть так - elementId@(commentId), так как
+    // элементы будут повторяться, а способом выше мы даем им
+    // фактически всегда уникальный id
+    int commentId = Model.Comment.Id;
+    string message = Model.Comment.Message;
+}
+
+<div class="border border-3 border-light rounded">
+    <div class="d-flex justify-content-between">
+
+        <div class="@styleForUsersComment fs-5 fw-bold m-1 ms-3 mb-0">
+            @Model.Comment?.User?.UserName
+        </div>
+        <div class="m-1 me-3 text-muted">
+            @Model.Comment?.Created.ToShortDateString() |
+            @Model.Comment?.Created.ToShortTimeString()
+        </div>
+    </div>
+
+    <div id="messageId@(commentId)"
+         class="fs-5 ms-1 mb-3" 
+         style="white-space:pre-line">@message</div>
+
+    <div>
+        @{
+            string disabledReply = Model.CurrentNested == CommentVM.MaxNested ? "disabled" : "";
+            string tabIndexForReply = disabledReply == "disabled" ? "-1" : "0";
+
+            string tabIndexForEdit = isCurentUserComment ? "0" : "-1";
+        }
+
+        @if (User.Identity!.IsAuthenticated)
+        {
+            <hr class="text-secondary mb-2 ms-3 me-3" />
+
+            <button class="btn btn-outline-success fw-bold
+                           border-top-0 border-bottom-0 border border-3 border-success
+                           mb-2 ms-2 me-3 ps-5 pe-5 @disabledReply"
+
+                    onclick="collapseReplyForm('@commentId')"
+
+                    tabindex="@tabIndexForReply"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#collapseReplyForm@(commentId)"
+                    aria-expanded="false"
+                    aria-controls="collapseReplyForm@(commentId)">
+                Reply
+            </button>
+
+
+            if (isCurentUserComment)
+            {
+                <button class="btn btn-outline-warning fw-bold
+                               border-top-0 border-bottom-0 border border-3 border-warning
+                               mb-2 me-3 ps-5 pe-5"
+
+                        onclick="copyTextOfCommentToEditForm('@(message)','@commentId')"
+
+                        tabindex="@tabIndexForEdit"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#collapseEditForm@(commentId)"
+                        aria-expanded="false"
+                        aria-controls="collapseEditForm@(commentId)">
+                    Edit
+                </button>
+            }
+        }
+
+        @*
+            Здесь SuperAdmin так же имеет удостоверение Admin, 
+            поэтому проверка на самый меньший доступный уровень
+        *@
+        @if (User.HasClaim(MyClaims.Admin, MyClaims.Admin))
+        {
+            @*onsubmit delete reply/root comment in js /////////////////////////////////*@
+            <form name="deleteCommentForm@(commentId)"
+                  onsubmit="deleteCommentHandler(event, @commentId)"
+                  class="d-inline">
+                <button class="btn btn-outline-danger fw-bold
+                               border-top-0 border-bottom-0 border border-3 border-danger
+                               mb-2 me-2 ps-5 pe-5">
+                    Delete
+                </button>
+            </form>
+            @*//////////////////////////////////////////////////////////////////////////*@
+        }
+    </div>
+
+
+    @*onsubmit add reply in js /////////////////////////////////////////////////////////*@
+    @if (User.Identity!.IsAuthenticated)
+    {
+        <div class="collapse ms-3 me-3 mt-3"
+             id="collapseReplyForm@(commentId)">
+            <form name="replyCommentForm@(commentId)"
+                  onsubmit="replyCommentHandler(event, @commentId)">
+
+                <textarea name="message"
+                          class="form-control"
+                          placeholder="Your reply..."
+                          rows="3"></textarea>
+                <span id="validationReply@(commentId)"
+                      class="text-danger fs-2 fw-semibold"></span>
+
+                <input type="hidden" name="postId" value="@Model.Comment!.Post!.Id" />
+                @*parentCommentId нового комментария это Id комментария, на который отвечают*@
+                <input type="hidden" name="parentCommentId" value="@commentId" />
+
+                <input type="hidden" name="currentNested" value="@Model.CurrentNested" />
+
+                <input type="submit"
+                   value="Send"
+                   class="btn btn-outline-success fw-bold fs-2
+                          border-top-0 border-bottom-0 border border-3 border-success
+                          mb-1 me-5 ps-3 pe-3 w-100" />
+            </form>
+        </div>
+    }
+
+    @if (isCurentUserComment)
+    {
+        <div class="collapse ms-3 me-3 mt-3"
+             id="collapseEditForm@(commentId)">
+            <form name="editCommentForm@(commentId)"
+                  onsubmit="editCommentHandler(event, @commentId)">
+
+                <textarea name="message"
+                          id="editTextAreaId@(commentId)"
+                          class="form-control"
+                          rows="3">
+                </textarea>
+                <span id="validationEdit@(commentId)"
+                      class="text-danger fs-2 fw-semibold"></span>
+
+                <input type="submit"
+                       value="Edit comment"
+                       class="btn btn-outline-warning fw-bold fs-2
+                              border-top-0 border-bottom-0 border border-3 border-warning
+                              mb-1 me-5 ps-3 pe-3 w-100" />
+            </form>
+        </div>
+    }
+    @*////////////////////////////////////////////////////////////////////////////////////*@
+</div>

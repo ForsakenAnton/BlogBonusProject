@@ -1,0 +1,15 @@
+﻿@model IEnumerable<PostDto>
+
+@if (Model.Any())
+{
+    <hr class="bg-primary mt-5" style="height:5px" />
+    <p class="fs-3 fw-semibold">Last Viewed Posts</p>
+    <hr class="bg-warning mb-5" style="height:5px" />
+
+    <div class="row">
+        @foreach (PostDto post in Model)
+        {
+            <partial name="_PostViewPartial" model="post" />
+        }
+    </div>
+}
