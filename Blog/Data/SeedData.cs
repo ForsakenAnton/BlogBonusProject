@@ -23,7 +23,7 @@ namespace Blog.Data
 
             using (ApplicationContext context = new ApplicationContext(options))
             {
-                context.Database.EnsureDeleted();
+               // context.Database.EnsureDeleted();
                 context.Database.EnsureCreated();
 
                 if (context.Posts.Any())

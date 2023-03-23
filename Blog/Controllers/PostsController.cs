@@ -9,6 +9,8 @@ using Blog.Models.DTO;
 using Microsoft.AspNetCore.Authorization;
 using Blog.Authorization;
 using Blog.Extentions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 
 namespace Blog.Controllers
 {
@@ -17,10 +19,20 @@ namespace Blog.Controllers
         private readonly ApplicationContext _context;
         private readonly IMapper _mapper;
 
-        public PostsController(ApplicationContext context, IMapper mapper)
+        private readonly IWebHostEnvironment _webHostEnvironment;
+
+        private readonly UserManager<User> _userManager;
+
+        public PostsController(
+            ApplicationContext context, 
+            IMapper mapper,
+            IWebHostEnvironment webHostEnvironment,
+            UserManager<User> userManager)
         {
             _context = context;
             _mapper = mapper;
+            _webHostEnvironment = webHostEnvironment;
+            _userManager = userManager;
         }
 
 
@@ -30,11 +42,12 @@ namespace Blog.Controllers
             int page = 1,
             SortState sortOrder = SortState.TitleAsc)
         {
-            int pageSize = 3;
+            int pageSize = 9;
 
             IQueryable<Post> posts = _context.Posts
                 .Include(p => p.Category)
                 .Include(p => p.User)
+                .Where(p => p.IsDeleted == false)
                 .AsNoTracking<Post>();
 
 
@@ -105,35 +118,11 @@ namespace Blog.Controllers
             return View(postsIndexVM);
         }
 
-        // GET: Posts
-        //public async Task<IActionResult> Index(int categoryId)
-        //{
-        //    IQueryable<Post> posts = _context.Posts
-        //        .Include(p => p.Category)
-        //        .Include(p => p.User)
-        //        .AsNoTracking<Post>();
-
-        //    if (categoryId != 0)
-        //    {
-        //        posts = posts.Where(p => p.Category!.Id == categoryId);
-        //    }
-
-        //    IQueryable<Category> categories = _context.Categories;
-
-        //    PostsIndexVM model = new PostsIndexVM
-        //    {
-        //        Posts = _mapper.Map<IEnumerable<PostDto>>(await posts.ToListAsync()),
-        //        Categories = _mapper.Map<IEnumerable<CategoryDto>>(await categories.ToListAsync()),
-        //        CategoryId = categoryId,
-        //    };
-
-        //    return View(model);
-        //}
 
         // GET: Posts/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if(id == null || _context.Posts == null)
+            if (id == null || _context.Posts == null)
             {
                 return NotFound();
             }
@@ -146,7 +135,7 @@ namespace Blog.Controllers
                 // .ThenInclude(c => c.ChildComments)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (post == null)
+            if (post == null || post.IsDeleted == true)
             {
                 return NotFound();
             }
@@ -163,33 +152,67 @@ namespace Blog.Controllers
             return View(model);
         }
 
+
         // GET: Posts/Create
         [Authorize(Policy = MyPolicies.PostsWriterAndAboveAccess)]
         public IActionResult Create()
         {
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id");
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id");
-            return View();
+            SelectList categoriesSL = new SelectList(
+                _mapper.Map<IEnumerable<CategoryDto>>(_context.Categories.AsNoTracking()),
+                "Id",
+                "Name");
+
+            PostCreateVM model = new PostCreateVM
+            {
+                CategoriesSL = categoriesSL,
+            };
+
+            return View(model);
         }
 
         // POST: Posts/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = MyPolicies.PostsWriterAndAboveAccess)]
-        public async Task<IActionResult> Create([Bind("Id,Title,Description,Body,Created,MainPostImagePath,IsDeleted,CategoryId,UserId")] Post post)
+        public async Task<IActionResult> Create(PostCreateVM model)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                _context.Add(post);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                SelectList categoriesSL = new SelectList(
+                    _mapper.Map<IEnumerable<CategoryDto>>(_context.Categories.AsNoTracking()),
+                    "Id",
+                    "Name",
+                    model.Post.CategoryId);
+
+                model.CategoriesSL = categoriesSL;
+
+                return View(model);
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", post.CategoryId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", post.UserId);
-            return View(post);
+
+            string path = "/images/" + model.Image.FileName;
+            string webRootPath = _webHostEnvironment.WebRootPath;
+            string fullPath = webRootPath + path;
+
+            using (var fileStream = new FileStream(fullPath, FileMode.Create))
+            {
+                await model.Image.CopyToAsync(fileStream);
+            }
+
+            model.Post.MainPostImagePath = path;
+
+            UserDto currentUser = _mapper
+                .Map<UserDto>(await _userManager.GetUserAsync(HttpContext.User));
+
+            model.Post.UserId = currentUser.Id;
+
+            Post postToCreate = _mapper.Map<Post>(model.Post);
+
+            _context.Add(postToCreate);
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
         }
+
+
 
         // GET: Posts/Edit/5
         [Authorize(Policy = MyPolicies.PostsWriterAndAboveAccess)]
@@ -201,52 +224,86 @@ namespace Blog.Controllers
             }
 
             var post = await _context.Posts.FindAsync(id);
-            if (post == null)
+            if (post == null || post.IsDeleted == true)
             {
                 return NotFound();
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", post.CategoryId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", post.UserId);
-            return View(post);
+
+            SelectList categoriesSL = new SelectList(
+                _mapper.Map<IEnumerable<CategoryDto>>(_context.Categories.AsNoTracking()),
+                "Id",
+                "Name",
+                post.Id);
+
+            PostEditVM model = new PostEditVM
+            {
+                Post = _mapper.Map<PostDto>(post),
+                CategoriesSL = categoriesSL
+            };
+
+            return View(model);
         }
 
         // POST: Posts/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = MyPolicies.PostsWriterAndAboveAccess)]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Description,Body,Created,MainPostImagePath,IsDeleted,CategoryId,UserId")] Post post)
+        public async Task<IActionResult> Edit(int id, PostEditVM model)
         {
-            if (id != post.Id)
+            if (id != model.Post.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(post);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!PostExists(post.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
-                return RedirectToAction(nameof(Index));
+                SelectList categoriesSL = new SelectList(
+                    _mapper.Map<IEnumerable<CategoryDto>>(_context.Categories.AsNoTracking()),
+                    "Id",
+                    "Name",
+                    model.Post.Id);
+
+                model.CategoriesSL = categoriesSL;
+
+                return View(model);
             }
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Id", post.CategoryId);
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Id", post.UserId);
-            return View(post);
+
+            if (model.Image is not null)
+            {
+                string path = "/images/" + model.Image.FileName;
+                string webRootPath = _webHostEnvironment.WebRootPath;
+                string fullPath = webRootPath + path;
+
+                using (var fileStream = new FileStream(fullPath, FileMode.Create))
+                {
+                    await model.Image.CopyToAsync(fileStream);
+                }
+
+                model.Post.MainPostImagePath = path;
+            }
+
+            Post postToEdit = _mapper.Map<Post>(model.Post);
+
+            try
+            {
+                _context.Update(postToEdit);
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!PostExists(postToEdit.Id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+            return RedirectToAction(nameof(Index));
         }
+
+
 
         // GET: Posts/Delete/5
         [Authorize(Policy = MyPolicies.AdminAndAboveAccess)]
@@ -257,16 +314,25 @@ namespace Blog.Controllers
                 return NotFound();
             }
 
-            var post = await _context.Posts
+            Post? post = await _context.Posts
                 .Include(p => p.Category)
                 .Include(p => p.User)
+                .Include(p => p.Comments)!
+                // .ThenInclude(c => c.ChildComments)
+                .AsNoTracking<Post>()
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (post == null)
+
+            if (post == null || post.IsDeleted == true)
             {
                 return NotFound();
             }
 
-            return View(post);
+            PostDeleteVM model = new PostDeleteVM
+            {
+                Post = _mapper.Map<PostDto>(post)
+            };
+
+            return View(model);
         }
 
         // POST: Posts/Delete/5
@@ -279,19 +345,22 @@ namespace Blog.Controllers
             {
                 return Problem("Entity set 'ApplicationContext.Posts'  is null.");
             }
+
             var post = await _context.Posts.FindAsync(id);
             if (post != null)
             {
-                _context.Posts.Remove(post);
+                // _context.Posts.Remove(post);
+                post.IsDeleted = true;
+                HttpContext.Session.Remove<Post>("LastViewedPosts" + post.Id);
             }
-            
+
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
         private bool PostExists(int id)
         {
-          return _context.Posts.Any(e => e.Id == id);
+            return _context.Posts.Any(e => e.Id == id);
         }
     }
 }

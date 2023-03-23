@@ -18,15 +18,19 @@
     <hr class="bg-success mb-5" style="height:5px;" />
 
     <div class="text-center mb-5">
-        <a href="#" class="btn btn-lg btn-outline-warning 
-                           border border-5 border-warning 
-                           fw-semibold fs-3 ps-md-5 pe-md-5 me-3">Edit Post</a>
+        <a asp-action="Edit"
+           asp-route-id="@Model.Post!.Id"
+           class="btn btn-lg btn-outline-warning 
+                  border border-5 border-warning 
+                  fw-semibold fs-3 ps-md-5 pe-md-5 me-3">Edit Post</a>
 
         @if (User.HasClaim(MyClaims.Admin, MyClaims.Admin))
         {
-            <a href="#" class="btn btn-lg btn-outline-danger 
-                               border border-5 border-danger 
-                               fw-semibold ps-md-5 pe-md-5 fs-3">Delete Post</a>
+            <a asp-action="Delete"
+               asp-route-id="@Model.Post!.Id"
+               class="btn btn-lg btn-outline-danger 
+                      border border-5 border-danger 
+                      fw-semibold ps-md-5 pe-md-5 fs-3">Delete Post</a>
         }
     </div>
 
@@ -72,7 +76,7 @@
          class="img-fluid img-thumbnail mb-5"
          alt="@Model.Post.Title">
 
-    <div style="white-space: pre-line" class="fs-3 mb-5">
+    <div style="white-space: pre-line" class="text-start fs-3 mb-5">
         @Model.Post.Body
     </div>
     <hr class="bg-warning border-0 mb-1" style="height:5px" />

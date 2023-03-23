@@ -1,5 +1,4 @@
-﻿@model Blog.Data.Entities.Post
-
+﻿@model PostDeleteVM
 @{
     ViewData["Title"] = "Delete";
 }
@@ -11,58 +10,62 @@
     <h4>Post</h4>
     <hr />
     <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Post.Title)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Post.Title)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Post.Description)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Post.Description)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Body)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Post.Body)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Body)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Post.Body)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Created)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Post.Created)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Created)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Post.Created)
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.MainPostImagePath)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Post.MainPostImagePath)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.MainPostImagePath)
+        <dd class="col-sm-10">
+            <img src="@Url.Content(Model.Post.MainPostImagePath)"
+                 class="w-25 mb-3"
+                 alt="@Model.Post.Title">
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.IsDeleted)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => Model.Post.Category)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.IsDeleted)
+        <dd class="col-sm-10">
+            @if (Model.Post.Category is not null)
+            {
+                @Html.DisplayFor(model => Model.Post.Category.Name)
+            }
+            else
+            {
+                @: No Category
+            }
+            
         </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => Model.Post.User!.UserName)
         </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.User)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.User.Id)
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => Model.Post.User!.UserName)
         </dd>
     </dl>
-    
+
     <form asp-action="Delete">
-        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="Post.Id" />
         <input type="submit" value="Delete" class="btn btn-danger" /> |
         <a asp-action="Index">Back to List</a>
     </form>

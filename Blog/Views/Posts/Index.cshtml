@@ -10,8 +10,8 @@
 
 @if (User.HasClaim(MyClaims.PostsWriter, MyClaims.PostsWriter))
 {
-    <a href="#"
-   class="btn btn-lg btn-outline-primary
+    <a asp-action="Create"
+       class="btn btn-lg btn-outline-primary
               border border-5 border-primary
               fw-semibold fs-3 mb-5">
         Write A New Post
@@ -116,8 +116,8 @@
                             <a class="dropdown-item" style="cursor:pointer"
                                asp-action="Index"
                                asp-route-page="@Model.PageVM!.PageNumber"
-                               asp-route-categoryId="@Model.FilterVM.CategoryId"
-                               asp-route-search="@Model.FilterVM.Search"
+                               asp-route-categoryId="@Model.FilterVM!.CategoryId"
+                               asp-route-search="@Model.FilterVM!.Search"
                                asp-route-sortOrder="@state">
                                 @sortStateElement
                             </a>
@@ -139,7 +139,7 @@
 @* Pagination *@
 <page-link page-vm="Model.PageVM!"
            page-action="Index"
-           page-url-categoryId="@(Model.FilterVM.CategoryId)"
+           page-url-categoryId="@(Model.FilterVM!.CategoryId)"
            page-url-search="@(Model.FilterVM.Search!)"
            page-url-sortOrder="@(Model.SortVM.Current)">
 </page-link>
