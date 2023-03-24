@@ -1,8 +1,8 @@
 ﻿$('#summernote').summernote({
     toolbar: [
-        ['style', ['style']],
+        ['style', ['style', 'bold', 'italic', 'underline', 'clear']],
         //['style', ['bold', 'italic', 'underline', 'clear']],
-        ['font', ['bold', 'underline', 'clear', 'strikethrough', 'superscript', 'subscript']],
+        ['font', ['strikethrough', 'superscript', 'subscript']],
         ['fontsize', ['fontsize']],
         ['fontname', ['fontname']],
         ['color', ['color']],
