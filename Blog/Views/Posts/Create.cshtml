@@ -27,7 +27,7 @@
 
             <div class="mb-3">
                 <label asp-for="Post.Body" class="control-label"></label>
-                <textarea asp-for="Post.Body" class="form-control"></textarea>
+                <textarea id="summernote" asp-for="Post.Body" class="form-control"></textarea>
                 <span asp-validation-for="Post.Body" class="text-danger"></span>
             </div>
 
@@ -62,6 +62,9 @@
        class="btn btn-outline-secondary fs-4 fw-bold">Back to List</a>
 </div>
 
-@section Scripts {
+
+<script src="~/js/myJS/summernoteConfig.js" asp-append-version="true"></script>
+
+@*@section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-}
+}*@

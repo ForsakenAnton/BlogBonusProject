@@ -76,9 +76,16 @@
          class="img-fluid img-thumbnail mb-5"
          alt="@Model.Post.Title">
 
-    <div style="white-space: pre-line" class="text-start fs-3 mb-5">
+    @*<div style="white-space: pre-line" class="text-start fs-3 mb-5">
         @Model.Post.Body
+    </div>*@   
+
+
+    <div class="clearfix fs-3 mb-5">
+        @Html.Raw(Model.Post.Body)
     </div>
+
+
     <hr class="bg-warning border-0 mb-1" style="height:5px" />
     <hr class="bg-info border-0 mt-0" style="height:5px" />
 </div>

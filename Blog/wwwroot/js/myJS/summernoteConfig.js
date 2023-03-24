@@ -1,0 +1,2 @@
+﻿$('#summernote').summernote({
+});
