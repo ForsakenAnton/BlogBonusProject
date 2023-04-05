@@ -24,7 +24,7 @@
             {     
                 foreach (CommentDto childComment in comment.ChildComments.OrderBy(c => c.Created))
                 {
-                    @: <div name="d2" class="removedTransition rounded rounded-3" 
+                    @: <div class="removedTransition rounded rounded-3" 
                     @:      style="margin-left:2%; background-color:@Model.BackgroundColor;">
                         <partial name="_CommentPartial"
                                  model="new CommentVM

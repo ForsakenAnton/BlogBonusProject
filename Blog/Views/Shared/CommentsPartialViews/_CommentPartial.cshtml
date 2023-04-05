@@ -5,7 +5,7 @@
         Model.Comment!.User!.UserName == User.Identity!.Name;
 
     string styleForUsersComment = isCurentUserComment ?
-        @"badge text-bg-light bg-gradient 
+        @"badge bg-light-subtle text-body bg-gradient
             border border-0 border-bottom border-5 border-success pe-3" :
         "";
 
@@ -117,7 +117,7 @@
                 <span id="validationReply@(commentId)"
                       class="text-danger fs-2 fw-semibold"></span>
 
-                <input type="hidden" name="postId" value="@Model.Comment!.Post!.Id" />
+                <input type="hidden" name="postId" value="@Model.Comment!.PostId" />
                 @*parentCommentId нового комментария это Id комментария, на который отвечают*@
                 <input type="hidden" name="parentCommentId" value="@commentId" />
 

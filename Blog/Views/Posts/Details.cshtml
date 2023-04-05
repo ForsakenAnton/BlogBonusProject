@@ -45,7 +45,7 @@
             border border-0 border-bottom border-3 border-success 
             align-items-baseline fs-2 pb-1 mb-3">
 
-    <div class="badge text-black bg-white fw-semibold pe-md-5 pe-3">
+    <div class="badge text-black bg-body text-body fw-semibold pe-md-5 pe-3">
         <i class="bi bi-calendar4-week"></i>
         @Model.Post!.Created.ToShortDateString()
     </div>
@@ -76,12 +76,13 @@
          class="img-fluid img-thumbnail mb-5"
          alt="@Model.Post.Title">
 
+    @* Old version *@
     @*<div style="white-space: pre-line" class="text-start fs-3 mb-5">
         @Model.Post.Body
-    </div>*@   
+    </div>*@
 
-
-    <div class="clearfix mb-5">
+    @* New version *@
+    <div class="clearfix text-start mb-5">
         @Html.Raw(Model.Post.Body)
     </div>
 
@@ -102,7 +103,7 @@
 
 
 <p>
-    <button class="btn btn-light text-center border-5 border-bottom w-100"
+    <button class="btn btn-light bg-body text-body text-center border-5 border-bottom w-100"
             type="button"
             data-bs-toggle="collapse"
             data-bs-target="#collapseComments"

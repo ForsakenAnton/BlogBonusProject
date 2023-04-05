@@ -99,10 +99,20 @@ namespace Blog.Controllers
             // pagination
             int postsCount = await posts.CountAsync();
 
-            List<Post> postItems = await posts
+            //List<Post> postItems = await posts
+            //    .Skip((page - 1) * pageSize)
+            //    .Take(pageSize)
+            //    .ToListAsync();
+
+            IQueryable<Post> postItems = posts
                 .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+                .Take(pageSize);
+
+            //foreach (Post postItem in postItems)
+            //{
+            //    await _context.Entry(postItem).Reference(p => p.Category!).LoadAsync();
+            //    await _context.Entry(postItem).Reference(p => p.User!).LoadAsync();
+            //}
 
             List<Category> categories = await _context.Categories.ToListAsync();
 
@@ -133,12 +143,29 @@ namespace Blog.Controllers
                 .Include(p => p.Comments)!
                     .ThenInclude(c => c.User)
                 // .ThenInclude(c => c.ChildComments)
+                .AsSplitQuery<Post>()
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (post == null || post.IsDeleted == true)
             {
                 return NotFound();
             }
+
+            //Post? post = await _context.Posts
+            //    .Include(p => p.Category)
+            //    .Include(p => p.User)
+            //    .FirstOrDefaultAsync(m => m.Id == id);
+
+            //if (post == null || post.IsDeleted == true)
+            //{
+            //    return NotFound();
+            //}
+
+            //await _context.Entry(post).Collection(p => p.Comments!).LoadAsync();
+            //foreach (var comment in post.Comments!)
+            //{
+            //    await _context.Entry(comment).Reference(c => c.User).LoadAsync();
+            //}
 
             HttpContext.Session.Set<PostDto>(
                 "LastViewedPosts" + post.Id,
