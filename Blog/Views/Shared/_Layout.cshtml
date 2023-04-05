@@ -14,7 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-lite.min.js"></script>
 </head>
 <body>
-    <header>
+    <header id="header" class="z-3 w-100">
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-light-subtle border-bottom box-shadow mb-3">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Blog</a>
@@ -40,12 +40,12 @@
 
                     @*Auth******************************************@
                     <ul class="navbar-nav align-items-center">
-                        <partial name="_AuthenticationPartial" />
+                        <partial name="_AuthenticationPartial" />   
                         <partial name="_ToogleThemeButtonPartial" />
                     </ul>
                 </div>
                     @*End of Auth***********************************@
-                </div>
+            </div>
         </nav>
     </header>
     <div class="container">
@@ -64,6 +64,8 @@
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script src="~/js/myJS/toogleBsTheme.js" asp-append-version="true"></script>
+    <script src="~/js/myJS/hidingWebsiteHat.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
