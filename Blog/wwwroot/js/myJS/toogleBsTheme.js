@@ -5,6 +5,7 @@ document.documentElement.setAttribute(
     globalThemeAttr ? globalThemeAttr : "light"
 );
 
+toogleThemeForSwitchThemeButton();
 toogleThemeForComments();
 
 function toogleTheme() {
@@ -30,12 +31,16 @@ function toogleTheme() {
         // console.log(globalThemeAttr);
     }
 
+    toogleThemeForSwitchThemeButton();
+    toogleThemeForComments();
+}
+
+function toogleThemeForSwitchThemeButton() {
+
     let toogleThemeButton = document.getElementById("toogleThemeButton");
     toogleThemeButton.textContent = globalThemeAttr == "light" ?
         "White" :
         "Dark";
-
-    toogleThemeForComments();
 }
 
 function toogleThemeForComments() {
